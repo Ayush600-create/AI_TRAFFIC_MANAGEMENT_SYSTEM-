@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: traffic-management-ai
+    runtime: docker
+    plan: starter
+    envVars:
+      - key: MONGO_URI
+        sync: false # Set this in Render dashboard
+      - key: GOOGLE_GENAI_KEY
+        sync: false # Set this in Render dashboard
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: traffic-storage
+      mountPath: /app/backend/uploads
+      sizeGB: 1

@@ -1,0 +1,37 @@
+[
+  {
+    "numberPlate": "KA01HH1234",
+    "ownerName": "Rahul Sharma",
+    "vehicleModel": "Honda City",
+    "vehicleColor": "White",
+    "registrationYear": "2020"
+  },
+  {
+    "numberPlate": "MH12DE5678",
+    "ownerName": "Priya Patil",
+    "vehicleModel": "Hyundai Creta",
+    "vehicleColor": "Silver",
+    "registrationYear": "2021"
+  },
+  {
+    "numberPlate": "DL01AB9012",
+    "ownerName": "Amit Kumar",
+    "vehicleModel": "Maruti Swift",
+    "vehicleColor": "Red",
+    "registrationYear": "2019"
+  },
+  {
+    "numberPlate": "TN07XY4321",
+    "ownerName": "Suresh Raina",
+    "vehicleModel": "Toyota Fortuner",
+    "vehicleColor": "Black",
+    "registrationYear": "2022"
+  },
+  {
+    "numberPlate": "WB02JK7890",
+    "ownerName": "Ananya Ghosh",
+    "vehicleModel": "Tata Nexon",
+    "vehicleColor": "Blue",
+    "registrationYear": "2023"
+  }
+]

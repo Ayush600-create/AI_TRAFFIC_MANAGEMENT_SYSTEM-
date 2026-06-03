@@ -1,0 +1,186 @@
+.violation-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.violation-card {
+  width: 320px;
+  background: rgba(20, 20, 25, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
+              inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  pointer-events: auto;
+  animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  overflow: hidden;
+  position: relative;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.violation-card.serious {
+  border-left: 4px solid #ff3d00;
+}
+
+.violation-card.warning {
+  border-left: 4px solid #ffc107;
+}
+
+.violation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.violation-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.serious .violation-badge {
+  background: rgba(255, 61, 0, 0.15);
+  color: #ff3d00;
+}
+
+.warning .violation-badge {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.violation-body {
+  margin-bottom: 16px;
+}
+
+.plate-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.owner-info {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.owner-name {
+  color: #00e5ff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.vehicle-model {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+.violation-desc {
+  font-size: 0.85rem;
+  color: #bbb;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.violation-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.penalty-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.penalty-amount span {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.penalty-amount strong {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.status-indicator {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.demo-note {
+  margin-top: 10px;
+  font-size: 0.6rem;
+  color: #444;
+  text-align: center;
+  font-style: italic;
+  border-top: 1px dashed rgba(255, 255, 255, 0.03);
+  padding-top: 8px;
+}
+
+/* Progress bar for auto-dismiss */
+.violation-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: currentColor;
+  width: 100%;
+  animation: progress 6s linear forwards;
+}
+
+.serious::after { color: #ff3d00; }
+.warning::after { color: #ffc107; }
+
+@keyframes progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}

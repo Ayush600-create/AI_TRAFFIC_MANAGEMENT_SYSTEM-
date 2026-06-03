@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+opencv-python-headless
+ultralytics
+torch --index-url https://download.pytorch.org/whl/cpu
+numpy
+python-multipart
+python-dotenv

@@ -1,0 +1,12 @@
+{
+  "watch": ["."],
+  "ext": "js,json",
+  "ignore": [
+    "uploads/",
+    "frames/",
+    "violations/",
+    "node_modules/",
+    "**/violations_registry.json"
+  ],
+  "verbose": true
+}
