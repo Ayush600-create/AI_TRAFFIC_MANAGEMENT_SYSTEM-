@@ -27,6 +27,13 @@ backend/violations/*
 yolov8n.pt
 yolov8s.pt
 
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
