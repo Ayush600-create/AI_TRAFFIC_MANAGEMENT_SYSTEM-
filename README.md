@@ -130,6 +130,21 @@ pip install -r requirements.txt
 python app.py
 ```
 
+### Render Deployment
+
+This repository includes a Render-ready Docker configuration for the full stack.
+The single Docker service builds the frontend, installs backend Node dependencies, installs Python ML requirements, and starts both the Python AI engine and Express backend.
+
+1. Create a Render Web Service from this repo.
+2. Set the service runtime to `Docker`.
+3. Use the default `Dockerfile` in the repo root.
+4. Add required environment variables in Render:
+   - `MONGO_URI` for your MongoDB connection string
+   - `GOOGLE_GENAI_KEY` if you use the LLM service
+5. Deploy.
+
+If you want to deploy only the frontend separately, host the backend elsewhere and point `VITE_API_URL` to that backend.
+
 ---
 
 ## 🎯 How It Works

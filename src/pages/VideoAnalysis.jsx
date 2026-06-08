@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Play, Pause, AlertTriangle, Activity, Upload, Loader, CheckCircle, Flag, X, Shield, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../api';
 
 // ─── Violation Detection Log Panel ───────────────────────────────────────────
 // Matches the paper's Fig 4.4 / 4.5 — displays confirmed violations with
@@ -180,14 +181,14 @@ const VideoAnalysis = () => {
     formData.append("file", file);
 
     try {
-      const uploadRes  = await fetch("/api/videos/upload", { method: "POST", body: formData });
+      const uploadRes  = await fetch(apiUrl("/api/videos/upload"), { method: "POST", body: formData });
       const uploadData = await uploadRes.json();
 
       if (uploadData.status === 'success') {
         const videoId = uploadData.videoId;
 
         // Trigger async processing (non-blocking)
-        fetch("/api/videos/process", {
+        fetch(apiUrl("/api/videos/process"), {
           method: "POST",
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ videoId })
@@ -197,14 +198,14 @@ const VideoAnalysis = () => {
         pollingRef.current = setInterval(async () => {
           try {
             // 1. Fetch processing status
-            const statusRes = await fetch(`/api/videos/${videoId}`);
+            const statusRes = await fetch(apiUrl(`/api/videos/${videoId}`));
             const statusData = await statusRes.json();
             if (statusData.totalFrames) setTotalFrames(statusData.totalFrames);
             if (statusData.processedFrames) setProcessedFrames(statusData.processedFrames);
             if (statusData.status === 'completed') setIsProcessing(false);
 
             // 2. Fetch violations
-            const res  = await fetch(`/api/violations/video/${videoId}`);
+            const res  = await fetch(apiUrl(`/api/violations/video/${videoId}`));
             const data = await res.json();
             if (data.length > 0) {
               setViolations(data);
@@ -246,7 +247,7 @@ const VideoAnalysis = () => {
   // ── Admin action: update violation status ──────────────────────────────────
   const handleViolationAction = async (id, newStatus) => {
     try {
-      await fetch(`/api/violations/${id}/status`, {
+      await fetch(apiUrl(`/api/violations/${id}/status`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

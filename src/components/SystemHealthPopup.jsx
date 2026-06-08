@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SystemHealthPopup.css';
 import { Activity, ShieldCheck, Cpu, Zap, X, BarChart, Server } from 'lucide-react';
+import { apiUrl } from '../api';
 
 const SystemHealthPopup = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -21,7 +22,7 @@ const SystemHealthPopup = () => {
     // Fetch real telemetry
     const fetchStats = async () => {
       try {
-        const res = await fetch('/api/videos/telemetry');
+        const res = await fetch(apiUrl('/api/videos/telemetry'));
         const data = await res.json();
         setStats(prev => ({
           ...prev,

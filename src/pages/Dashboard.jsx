@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../api';
 import { Activity, Zap, Video, TrafficCone, HelpCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +10,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('/api/videos/telemetry');
+        const res = await fetch(apiUrl('/api/videos/telemetry'));
         const data = await res.json();
         setTelemetry(data);
       } catch (err) {

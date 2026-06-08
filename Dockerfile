@@ -40,6 +40,10 @@ COPY . .
 # Ensure directories exist for storage
 RUN mkdir -p backend/uploads backend/frames backend/violations
 
+# Copy start script and make it executable
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh
+
 # Expose the port (Render default)
 EXPOSE 5000
 
@@ -47,5 +51,5 @@ EXPOSE 5000
 ENV PORT=5000
 ENV PYTHON_AI_SERVICE_URL=http://localhost:8001
 
-# Start script: Run Python AI engine in background and Node.js server in foreground
-CMD ["sh", "-c", "python3 backend/python-ml/main.py & node backend/server.js"]
+# Start script: run Python AI engine and backend server together
+CMD ["./start.sh"]

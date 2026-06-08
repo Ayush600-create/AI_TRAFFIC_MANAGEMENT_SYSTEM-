@@ -43,7 +43,25 @@ app.get('*', (req, res) => {
 });
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI)
+const connectDatabase = async () => {
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  if (mongoUri) {
+    return mongoose.connect(mongoUri);
+  }
+
+  // Fallback to in-memory MongoDB for quick local demo if no URI provided
+  try {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    const mongod = await MongoMemoryServer.create();
+    const uri = mongod.getUri();
+    console.log('Using in-memory MongoDB at', uri);
+    return mongoose.connect(uri);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
+
+connectDatabase()
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 

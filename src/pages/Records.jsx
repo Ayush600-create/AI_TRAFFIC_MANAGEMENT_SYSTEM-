@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { apiUrl } from '../api';
 import { AlertCircle, MapPin, CheckCircle, Download, Database, TrafficCone } from 'lucide-react';
 
 const Records = () => {
@@ -16,7 +17,7 @@ const Records = () => {
         
         // If no ID is provided in URL, fetch all and pick the first one
         if (!fetchId) {
-          const listRes = await fetch('/api/violations');
+          const listRes = await fetch(apiUrl('/api/violations'));
           const list = await listRes.json();
           if (list.length > 0) {
             fetchId = list[0]._id;
@@ -25,7 +26,7 @@ const Records = () => {
           }
         }
 
-        const res = await fetch(`/api/violations/${fetchId}`);
+        const res = await fetch(apiUrl(`/api/violations/${fetchId}`));
         const data = await res.json();
         
         if (data.error) throw new Error(data.error);
@@ -62,7 +63,7 @@ const Records = () => {
     if (!record || isUpdating) return;
     setIsUpdating(true);
     try {
-      const res = await fetch(`/api/violations/${record.caseId}/status`, {
+      const res = await fetch(apiUrl(`/api/violations/${record.caseId}/status`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
@@ -71,7 +72,7 @@ const Records = () => {
         setStatus(newStatus);
         
         // 1. Fetch the list to find the next one
-        const listRes = await fetch('/api/violations');
+        const listRes = await fetch(apiUrl('/api/violations'));
         const list = await listRes.json();
         const currentIndex = list.findIndex(v => v._id === record.caseId);
         

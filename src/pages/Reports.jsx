@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../api';
 
 const Reports = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const Reports = () => {
   const filters = ['All Reports', 'Helmet', 'Red Light', 'Lane'];
 
   useEffect(() => {
-    fetch('/api/violations')
+    fetch(apiUrl('/api/violations'))
       .then(res => res.json())
       .then(data => {
         const formattedData = data.map(v => ({
