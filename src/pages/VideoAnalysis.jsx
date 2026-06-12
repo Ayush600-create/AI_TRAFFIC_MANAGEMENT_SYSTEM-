@@ -358,7 +358,7 @@ const VideoAnalysis = () => {
             TRACKING {analysisData ? 'ACTIVE' : 'IDLE'}
           </div>
 
-          <div style={{ display: 'grid', placeItems: 'center', maxHeight: '100%', maxWidth: '100%', position: 'relative', background: '#0a0c10' }}>
+          <div style={{ display: 'grid', placeItems: 'center', width: '100%', height: '100%', position: 'relative', background: '#0a0c10' }}>
             {videoUrl
               ? <video ref={videoRef} src={videoUrl} className="ai-video-player"
                   style={{ gridArea: '1/1', maxHeight: '100%', maxWidth: '100%', zIndex: 1 }}

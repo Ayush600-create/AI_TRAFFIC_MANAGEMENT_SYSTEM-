@@ -94,9 +94,14 @@ async def detect_api(request: ImageRequest):
                 # Deduplication Key: ID + Type
                 dedup_key = f"{assigned_id}_{viol_type}"
                 if dedup_key not in reported_violations:
-                    # Assign a mock plate based on ID (for demo matching)
-                    mock_plates = ["KA01HH1234", "MH12DE5678", "DL01AB9012", "TN07XY4321", "WB02JK7890"]
-                    assigned_plate = mock_plates[assigned_id % len(mock_plates)] if assigned_id != -1 else "UNKNOWN"
+                    # Assign a mock plate based on the detected vehicle label
+                    motorcycle_plates = ["MH12DE5678", "TN07XY4321"]  # Royal Enfield, Yamaha FZ-S
+                    car_plates = ["KA01HH1234", "DL01AB9012", "WB02JK7890"]  # Honda City, Maruti Swift, Tata Nexon
+                    
+                    if d['label'].lower() == 'motorcycle':
+                        assigned_plate = motorcycle_plates[assigned_id % len(motorcycle_plates)]
+                    else:
+                        assigned_plate = car_plates[assigned_id % len(car_plates)]
 
                     final_violations.append({
                         "vehicle_id": assigned_id,
