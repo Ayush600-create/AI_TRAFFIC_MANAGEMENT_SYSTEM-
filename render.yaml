@@ -7,7 +7,7 @@ services:
     startCommand: npx sirv-cli dist --port $PORT --host
     envVars:
       - key: VITE_API_URL
-        value: https://traffic-backend.onrender.com # Change to backend service URL if different
+        value: https://ai-traffic-management-system.onrender.com
       - key: PORT
         value: 3000
 

@@ -258,7 +258,6 @@ const VideoAnalysis = () => {
       }
     } catch (e) {
       console.error("Backend error:", e);
-      alert("Make sure the Node.js backend is running on port 5000!");
     } finally {
       setIsProcessing(false);
     }
