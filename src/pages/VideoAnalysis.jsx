@@ -352,16 +352,16 @@ const VideoAnalysis = () => {
         </div>
 
         {/* Video Player */}
-        <div className="glass-panel" style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#0a0c10', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', background: '#0a0c10', width: '100%' }}>
           <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(0,229,255,0.1)', border: '1px solid var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)', zIndex: 10 }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 8px var(--accent-cyan)' }} />
             TRACKING {analysisData ? 'ACTIVE' : 'IDLE'}
           </div>
 
-          <div style={{ display: 'grid', placeItems: 'center', maxHeight: '100%', maxWidth: '100%', position: 'relative', background: '#0a0c10' }}>
+          <div style={{ display: 'grid', placeItems: 'center', width: '100%', aspectRatio: '16/9', position: 'relative', background: '#0a0c10' }}>
             {videoUrl
               ? <video ref={videoRef} src={videoUrl} className="ai-video-player"
-                  style={{ gridArea: '1/1', maxHeight: '100%', maxWidth: '100%', zIndex: 1 }}
+                  style={{ gridArea: '1/1', width: '100%', aspectRatio: '16/9', objectFit: 'contain', zIndex: 1 }}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={e => setVideoDuration(e.target.duration)}
                   onEnded={() => setIsPlaying(false)} />
@@ -369,7 +369,7 @@ const VideoAnalysis = () => {
             }
 
             {/* Bounding-box overlay */}
-            <div style={{ gridArea: '1/1', width: videoRef.current?.offsetWidth || '100%', height: videoRef.current?.offsetHeight || '100%', position: 'relative', pointerEvents: 'none', zIndex: 2 }}>
+            <div style={{ gridArea: '1/1', width: '100%', height: '100%', position: 'relative', pointerEvents: 'none', zIndex: 2 }}>
               {currentBoxes.map((box, i) => {
                 const isViol = box.type === 'violation';
                 const color  = isViol ? 'var(--accent-red)' : 'var(--accent-cyan)';
