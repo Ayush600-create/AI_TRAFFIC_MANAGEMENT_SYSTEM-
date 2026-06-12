@@ -9,7 +9,11 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, '../uploads'));
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext);
+    // Sanitize name and limit length to 30 characters to prevent Windows MAX_PATH (260 char) errors
+    const sanitized = baseName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+    cb(null, `${Date.now()}-${sanitized}${ext}`);
   }
 });
 
