@@ -352,40 +352,38 @@ const VideoAnalysis = () => {
         </div>
 
         {/* Video Player */}
-        <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', background: '#0a0c10', width: '100%' }}>
+        <div className="glass-panel" style={{ width: '100%', aspectRatio: '16/9', position: 'relative', overflow: 'hidden', background: '#0a0c10', display: 'grid', placeItems: 'center' }}>
           <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(0,229,255,0.1)', border: '1px solid var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)', zIndex: 10 }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 8px var(--accent-cyan)' }} />
             TRACKING {analysisData ? 'ACTIVE' : 'IDLE'}
           </div>
 
-          <div style={{ display: 'grid', placeItems: 'center', width: '100%', aspectRatio: '16/9', position: 'relative', background: '#0a0c10' }}>
-            {videoUrl
-              ? <video ref={videoRef} src={videoUrl} className="ai-video-player"
-                  style={{ gridArea: '1/1', width: '100%', aspectRatio: '16/9', objectFit: 'contain', zIndex: 1 }}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={e => setVideoDuration(e.target.duration)}
-                  onEnded={() => setIsPlaying(false)} />
-              : <div style={{ gridArea: '1/1', color: 'var(--text-muted)' }}>Upload footage to begin tracking...</div>
-            }
+          {videoUrl
+            ? <video ref={videoRef} src={videoUrl} className="ai-video-player"
+                style={{ gridArea: '1/1', width: '100%', height: '100%', objectFit: 'fill', zIndex: 1 }}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={e => setVideoDuration(e.target.duration)}
+                onEnded={() => setIsPlaying(false)} />
+            : <div style={{ gridArea: '1/1', color: 'var(--text-muted)' }}>Upload footage to begin tracking...</div>
+          }
 
-            {/* Bounding-box overlay */}
-            <div style={{ gridArea: '1/1', width: '100%', height: '100%', position: 'relative', pointerEvents: 'none', zIndex: 2 }}>
-              {currentBoxes.map((box, i) => {
-                const isViol = box.type === 'violation';
-                const color  = isViol ? 'var(--accent-red)' : 'var(--accent-cyan)';
-                return (
-                  <div key={i} className={isViol ? 'glow-box-red' : 'glow-box-cyan'} style={{ position: 'absolute', left: box.x + '%', top: box.y + '%', width: box.w + '%', height: box.h + '%', border: '1.5px solid ' + color, transition: 'all 0.1s' }}>
-                    <div style={{ position: 'absolute', top: '-20px', left: '-1.5px', background: color, color: '#000', fontSize: '0.7rem', padding: '2px 6px', fontWeight: 'bold' }}>
-                      {box.label} [{(box.conf * 100).toFixed(1)}%]
-                    </div>
+          {/* Bounding-box overlay */}
+          <div style={{ gridArea: '1/1', width: '100%', height: '100%', position: 'relative', pointerEvents: 'none', zIndex: 2 }}>
+            {currentBoxes.map((box, i) => {
+              const isViol = box.type === 'violation';
+              const color  = isViol ? 'var(--accent-red)' : 'var(--accent-cyan)';
+              return (
+                <div key={i} className={isViol ? 'glow-box-red' : 'glow-box-cyan'} style={{ position: 'absolute', left: box.x + '%', top: box.y + '%', width: box.w + '%', height: box.h + '%', border: '1.5px solid ' + color, transition: 'all 0.1s' }}>
+                  <div style={{ position: 'absolute', top: '-20px', left: '-1.5px', background: color, color: '#000', fontSize: '0.7rem', padding: '2px 6px', fontWeight: 'bold' }}>
+                    {box.label} [{(box.conf * 100).toFixed(1)}%]
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Progress bar */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.1)' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px', background: 'rgba(255,255,255,0.1)', zIndex: 3 }}>
             <div style={{ height: '100%', width: progressPct + '%', background: 'var(--accent-cyan)', boxShadow: '0 0 10px var(--accent-cyan)', transition: 'width 0.1s linear' }} />
           </div>
         </div>
