@@ -15,7 +15,18 @@ app = FastAPI(title="Production Traffic Analytics Engine")
 detector = TrafficDetector()
 tracker = CentroidTracker(max_disappeared=15)
 rules = TrafficRules()
-reader = easyocr.Reader(['en'])
+
+model_dir = '/tmp/easyocr'
+os.makedirs(model_dir, exist_ok=True)
+cached_files = ['craft_mlt_25k.pth', 'english_g2.pth']
+is_cached = all(os.path.exists(os.path.join(model_dir, f)) for f in cached_files)
+
+if is_cached:
+    print("[AI] EasyOCR models are already cached in /tmp/easyocr.")
+else:
+    print("[AI] EasyOCR models not fully cached. Downloading to /tmp/easyocr...")
+
+reader = easyocr.Reader(['en'], model_storage_directory=model_dir)
 
 # In-memory storage for vehicle violation history (Prevents duplicates)
 # In production, this would be a Redis cache with TTL

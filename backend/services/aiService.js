@@ -1,6 +1,11 @@
 const axios = require('axios');
 
-const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || 'http://localhost:8001';
+const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || (isProd ? null : 'http://localhost:8001');
+
+if (isProd && !PYTHON_SERVICE_URL) {
+  throw new Error('PYTHON_AI_SERVICE_URL is not set in production!');
+}
 
 /**
  * Sends a frame to the Python ML service for detection and rule-based verification.

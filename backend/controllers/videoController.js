@@ -50,7 +50,11 @@ exports.processVideo = async (req, res) => {
         // Reset the AI service session for the new video
         try {
           const axios = require('axios');
-          const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || 'http://localhost:8001';
+          const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+          const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || (isProd ? null : 'http://localhost:8001');
+          if (isProd && !PYTHON_SERVICE_URL) {
+            throw new Error('PYTHON_AI_SERVICE_URL is not set in production!');
+          }
           await axios.post(`${PYTHON_SERVICE_URL}/reset-session`);
           console.log(`[AI] Detection session reset successfully.`);
         } catch (err) {

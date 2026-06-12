@@ -1,4 +1,11 @@
 require('dotenv').config();
+
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+if (isProduction && !process.env.PYTHON_SERVICE_URL && !process.env.PYTHON_AI_SERVICE_URL) {
+  console.error('CRITICAL ERROR: PYTHON_AI_SERVICE_URL environment variable is not set in production!');
+  process.exit(1);
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
