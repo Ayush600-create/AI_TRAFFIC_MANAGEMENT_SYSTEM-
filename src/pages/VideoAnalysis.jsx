@@ -320,7 +320,7 @@ const VideoAnalysis = () => {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', gap: '2rem', height: 'calc(100vh - 140px)', overflow: 'auto' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', gap: '2rem' }}>
 
       {/* ── Main Video Column ── */}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -352,7 +352,7 @@ const VideoAnalysis = () => {
         </div>
 
         {/* Video Player */}
-        <div className="glass-panel" style={{ width: '100%', aspectRatio: '16/9', position: 'relative', overflow: 'hidden', background: '#0a0c10', display: 'grid', placeItems: 'center' }}>
+        <div className="glass-panel" style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden', background: '#0a0c10' }}>
           <div style={{ position: 'absolute', top: '1rem', left: '1rem', background: 'rgba(0,229,255,0.1)', border: '1px solid var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)', zIndex: 10 }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 8px var(--accent-cyan)' }} />
             TRACKING {analysisData ? 'ACTIVE' : 'IDLE'}
@@ -360,15 +360,15 @@ const VideoAnalysis = () => {
 
           {videoUrl
             ? <video ref={videoRef} src={videoUrl} className="ai-video-player"
-                style={{ gridArea: '1/1', width: '100%', height: '100%', objectFit: 'fill', zIndex: 1 }}
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'fill', zIndex: 1 }}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={e => setVideoDuration(e.target.duration)}
                 onEnded={() => setIsPlaying(false)} />
-            : <div style={{ gridArea: '1/1', color: 'var(--text-muted)' }}>Upload footage to begin tracking...</div>
+            : <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Upload footage to begin tracking...</div>
           }
 
           {/* Bounding-box overlay */}
-          <div style={{ gridArea: '1/1', width: '100%', height: '100%', position: 'relative', pointerEvents: 'none', zIndex: 2 }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}>
             {currentBoxes.map((box, i) => {
               const isViol = box.type === 'violation';
               const color  = isViol ? 'var(--accent-red)' : 'var(--accent-cyan)';
@@ -427,7 +427,7 @@ const VideoAnalysis = () => {
       </div>
 
       {/* ── Right Sidebar ── */}
-      <div style={{ width: '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%', overflow: 'hidden' }}>
+      <div style={{ width: '360px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
         {/* Violation Detection Log (paper Fig 4.4 / 4.5) */}
         <ViolationLogPanel violations={violations} onAction={handleViolationAction} />
