@@ -49,6 +49,12 @@ const connectDatabase = async () => {
     return mongoose.connect(mongoUri);
   }
 
+  // Disable in-memory MongoDB fallback in production to prevent deployment hangs/crashes
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('WARNING: MONGO_URI is not set in production. Skipping database connection. Application will run in stateless mode.');
+    return null;
+  }
+
   // Fallback to in-memory MongoDB for quick local demo if no URI provided
   try {
     const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -62,9 +68,13 @@ const connectDatabase = async () => {
 };
 
 connectDatabase()
-  .then(() => console.log('Connected to MongoDB'))
+  .then((conn) => {
+    if (conn) {
+      console.log('Connected to MongoDB');
+    }
+  })
   .catch(err => console.error('Could not connect to MongoDB', err));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });

@@ -49,7 +49,7 @@ EXPOSE 5000
 
 # Environment variables
 ENV PORT=5000
-ENV PYTHON_AI_SERVICE_URL=http://localhost:8001
+ENV PYTHON_AI_SERVICE_URL=http://127.0.0.1:8001
 
 # Start script: run Python AI engine and backend server together
 CMD ["./start.sh"]

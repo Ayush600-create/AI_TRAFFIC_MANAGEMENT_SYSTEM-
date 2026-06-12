@@ -16,9 +16,9 @@ services:
       - key: GROQ_API_KEY
         sync: false # Set this in Render dashboard
       - key: PYTHON_SERVICE_URL
-        value: http://localhost:8001
+        value: http://127.0.0.1:8001
       - key: PYTHON_AI_SERVICE_URL
-        value: http://localhost:8001
+        value: http://127.0.0.1:8001
       - key: NODE_ENV
         value: production
     disk:

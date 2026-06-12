@@ -28,117 +28,145 @@ exports.uploadVideo = async (req, res) => {
 
 exports.processVideo = async (req, res) => {
   const { videoId } = req.body;
-  const framesDir = path.join(__dirname, '../frames', videoId);
   try {
     const video = await Video.findOne({ id: videoId });
     if (!video) return res.status(404).json({ error: 'Video not found' });
 
-    video.status = 'processing';
-    await video.save();
+    // Respond immediately to the frontend to prevent HTTP timeouts on deployment platforms (e.g. Render)
+    res.json({ status: 'processing', message: 'Video processing started in the background.' });
 
-    const frames = await extractFrames(video.path, framesDir, 2);
-    
-    video.totalFrames = frames.length;
-    await video.save();
+    // Run processing in the background
+    (async () => {
+      const framesDir = path.join(__dirname, '../frames', videoId);
+      try {
+        video.status = 'processing';
+        await video.save();
 
-    // Reset the AI service session for the new video
-    try {
-      const axios = require('axios');
-      const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || 'http://localhost:8001';
-      await axios.post(`${PYTHON_SERVICE_URL}/reset-session`);
-      console.log(`[AI] Detection session reset successfully.`);
-    } catch (err) {
-      console.warn(`[AI] Failed to reset session: ${err.message}`);
-    }
+        const frames = await extractFrames(video.path, framesDir, 2);
+        
+        video.totalFrames = frames.length;
+        await video.save();
 
-    console.log(`[Processor] Processing ${frames.length} frames for video ${videoId}...`);
+        // Reset the AI service session for the new video
+        try {
+          const axios = require('axios');
+          const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || 'http://localhost:8001';
+          await axios.post(`${PYTHON_SERVICE_URL}/reset-session`);
+          console.log(`[AI] Detection session reset successfully.`);
+        } catch (err) {
+          console.warn(`[AI] Failed to reset session: ${err.message}`);
+        }
 
-    for (const frame of frames) {
-      const results = await analyzeFrame(frame.path);
-      
-      if (results.violations && results.violations.length > 0) {
-        console.log(`[AI] Found ${results.violations.length} violations in frame ${frame.id}`);
-        for (const viol of results.violations) {
-          const explanation = await explainViolation({
-            type: viol.type,
-            violation: viol.violation,
-            severity: viol.severity,
-            confidence: viol.confidence
-          });
+        console.log(`[Processor] Processing ${frames.length} frames for video ${videoId}...`);
 
-          const videoType = viol.type;
-          const violationFilename = `viol_${videoId}_${frame.id}_${videoType}.jpg`;
-          const violationStoragePath = path.join(__dirname, '../violations', violationFilename);
+        for (const frame of frames) {
+          const results = await analyzeFrame(frame.path);
           
-          try {
-            if (!viol.annotated_frame_url) {
-                fs.copyFileSync(frame.path, violationStoragePath);
-            }
-          } catch (err) {
-            console.error('Failed to copy violation frame:', err);
-          }
+          if (results.violations && results.violations.length > 0) {
+            console.log(`[AI] Found ${results.violations.length} violations in frame ${frame.id}`);
+            for (const viol of results.violations) {
+              const explanation = await explainViolation({
+                type: viol.type,
+                violation: viol.violation,
+                severity: viol.severity,
+                confidence: viol.confidence
+              });
 
-          const newViolation = new Violation({
-            videoId: videoId,
-            frameId: frame.id,
-            timestamp: frame.timestamp,
-            vehicleId: viol.vehicle_id,
-            type: viol.violation,
-            severity: viol.severity,
-            confidence: viol.confidence,
-            imageUrl: viol.annotated_frame_url || `/violations-media/${violationFilename}`,
-            boxData: viol.bbox,
-            vehicleType: viol.type,
-            numberPlate: viol.number_plate || 'UNKNOWN',
-            location: 'Sector 4 Crossing',
-            explanation: {
-              reason: explanation.reason,
-              rule: explanation.rule,
-              action: explanation.suggested_action
-            }
-          });
-          await newViolation.save();
+              const videoType = viol.type;
+              const violationFilename = `viol_${videoId}_${frame.id}_${videoType}.jpg`;
+              const violationStoragePath = path.join(__dirname, '../violations', violationFilename);
+              
+              try {
+                if (!viol.annotated_frame_url) {
+                    fs.copyFileSync(frame.path, violationStoragePath);
+                }
+              } catch (err) {
+                console.error('Failed to copy violation frame:', err);
+              }
 
-          const registryPath = path.join(__dirname, '../violations/violations_registry.json');
-          let registry = [];
-          if (fs.existsSync(registryPath)) {
-            try {
-              registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-            } catch (e) { registry = []; }
+              const newViolation = new Violation({
+                videoId: videoId,
+                frameId: frame.id,
+                timestamp: frame.timestamp,
+                vehicleId: viol.vehicle_id,
+                type: viol.violation,
+                severity: viol.severity,
+                confidence: viol.confidence,
+                imageUrl: viol.annotated_frame_url || `/violations-media/${violationFilename}`,
+                boxData: viol.bbox,
+                vehicleType: viol.type,
+                numberPlate: viol.number_plate || 'UNKNOWN',
+                location: 'Sector 4 Crossing',
+                explanation: {
+                  reason: explanation.reason,
+                  rule: explanation.rule,
+                  action: explanation.suggested_action
+                }
+              });
+              await newViolation.save();
+
+              const registryPath = path.join(__dirname, '../violations/violations_registry.json');
+              let registry = [];
+              if (fs.existsSync(registryPath)) {
+                try {
+                  registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+                } catch (e) { registry = []; }
+              }
+              registry.push({
+                db_id: newViolation._id,
+                videoId,
+                vehicleId: viol.vehicle_id,
+                type: viol.violation,
+                severity: viol.severity,
+                timestamp: new Date().toISOString(),
+                image_url: newViolation.imageUrl,
+                explanation: explanation.reason
+              });
+              fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2));
+            }
           }
-          registry.push({
-            db_id: newViolation._id,
-            videoId,
-            vehicleId: viol.vehicle_id,
-            type: viol.violation,
-            severity: viol.severity,
-            timestamp: new Date().toISOString(),
-            image_url: newViolation.imageUrl,
-            explanation: explanation.reason
-          });
-          fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2));
+          
+          // Re-fetch video from DB to prevent concurrent edit overwrite bugs
+          const freshVideo = await Video.findOne({ id: videoId });
+          if (freshVideo) {
+            freshVideo.processedFrames += 1;
+            await freshVideo.save();
+          }
+        }
+
+        const finalVideo = await Video.findOne({ id: videoId });
+        if (finalVideo) {
+          finalVideo.status = 'completed';
+          await finalVideo.save();
+        }
+        console.log(`[Processor] Processing successfully completed for video ${videoId}.`);
+      } catch (error) {
+        console.error(`[Processor] Error processing video ${videoId}:`, error);
+        try {
+          const errorVideo = await Video.findOne({ id: videoId });
+          if (errorVideo) {
+            errorVideo.status = 'failed';
+            await errorVideo.save();
+          }
+        } catch (saveError) {
+          console.error('[Processor] Failed to save failed status:', saveError);
+        }
+      } finally {
+        // Delete temp frames directory to prevent disk-space leaks on Render
+        try {
+          if (fs.existsSync(framesDir)) {
+            fs.rmSync(framesDir, { recursive: true, force: true });
+            console.log(`[Processor] Cleaned up temporary frames directory: ${framesDir}`);
+          }
+        } catch (cleanupError) {
+          console.error(`[Processor] Failed to clean up temporary frames directory: ${cleanupError.message}`);
         }
       }
-      
-      video.processedFrames += 1;
-      await video.save();
-    }
-
-    video.status = 'completed';
-    await video.save();
-    res.json({ status: 'success', message: 'Video processing complete.' });
+    })();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
-  } finally {
-    // Delete temp frames directory to prevent disk-space leaks on Render
-    try {
-      if (fs.existsSync(framesDir)) {
-        fs.rmSync(framesDir, { recursive: true, force: true });
-        console.log(`[Processor] Cleaned up temporary frames directory: ${framesDir}`);
-      }
-    } catch (cleanupError) {
-      console.error(`[Processor] Failed to clean up temporary frames directory: ${cleanupError.message}`);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
     }
   }
 };

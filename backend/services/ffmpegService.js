@@ -1,11 +1,21 @@
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
 
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
+// Use system-wide ffmpeg/ffprobe on Docker/Render. Fall back to installers in local development.
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+    const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+    ffmpeg.setFfmpegPath(ffmpegPath);
+    ffmpeg.setFfprobePath(ffprobePath);
+    console.log('[ffmpeg] Local mode: Using installer-bundled binaries');
+  } catch (e) {
+    console.log('[ffmpeg] Local installers not found, using system PATH');
+  }
+} else {
+  console.log('[ffmpeg] Production mode: Using system-wide ffmpeg and ffprobe');
+}
 
 /**
  * Returns video metadata (duration, fps, resolution) via ffprobe.
