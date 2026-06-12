@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Download, FileText, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Reports = () => {
   const navigate = useNavigate();
@@ -36,6 +38,67 @@ const Reports = () => {
     return true;
   });
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add Header
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30, 41, 59);
+    doc.text("Kinetic Oversight — Violation Intelligence Report", 14, 20);
+
+    // Add Subheader
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()} | Filter: ${activeFilter} | Total Violations: ${filteredData.length}`, 14, 28);
+
+    // Map table rows with colored violation type text
+    const rows = filteredData.map(row => {
+      const isRed = row.type.includes('RED') || row.type.includes('WRONG');
+      const typeCell = {
+        content: row.type,
+        styles: {
+          textColor: isRed ? [239, 68, 68] : [245, 158, 11], // Red / Amber
+          fontStyle: 'bold'
+        }
+      };
+      return [
+        row.id.substring(0, 12),
+        row.time,
+        `FRAME ${row.frame}`,
+        row.loc,
+        typeCell,
+        `${row.conf}%`,
+        row.status
+      ];
+    });
+
+    // Draw the table
+    autoTable(doc, {
+      head: [['Incident ID', 'Timestamp', 'Frame', 'Location', 'Violation Type', 'AI Confidence', 'Status']],
+      body: rows,
+      startY: 34,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [30, 41, 59], // Dark Slate
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252] // Slate 50
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 4
+      }
+    });
+
+    // Save/Download PDF
+    const today = new Date().toISOString().split('T')[0];
+    doc.save(`violation_report_${today}.pdf`);
+  };
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', height: '100%' }}>
       
@@ -45,7 +108,7 @@ const Reports = () => {
           <p style={{ color: 'var(--text-secondary)' }}>Aggregated data streams from 144 active sensor nodes.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn-outline"><FileText size={16} /> Export PDF</button>
+          <button className="btn-outline" onClick={exportToPDF}><FileText size={16} /> Export PDF</button>
           <button className="btn-primary" style={{ background: 'var(--accent-cyan)', color: '#000', boxShadow: 'none' }}>
             <Download size={16} /> Export CSV
           </button>

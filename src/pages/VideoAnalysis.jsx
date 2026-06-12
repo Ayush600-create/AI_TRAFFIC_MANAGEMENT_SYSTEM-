@@ -120,10 +120,17 @@ const VideoAnalysis = () => {
   const navigate = useNavigate();
 
   const simulateViolation = () => {
-    const plates = ["KA01HH1234", "MH12DE5678", "DL01AB9012", "TN07XY4321", "UNKNOWN-999"];
     const violations = ["No Helmet", "Signal Jump", "Over Speeding", "Wrong Side", "Triple Riding"];
     
-    const randomPlate = plates[Math.floor(Math.random() * plates.length)];
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const digits = "0123456789";
+    const randomChar = (chars) => chars[Math.floor(Math.random() * chars.length)];
+    const randomPlate = 
+      randomChar(letters) + randomChar(letters) + 
+      randomChar(digits) + randomChar(digits) + 
+      randomChar(letters) + randomChar(letters) + 
+      randomChar(digits) + randomChar(digits) + randomChar(digits) + randomChar(digits);
+
     const randomViol = violations[Math.floor(Math.random() * violations.length)];
 
     const event = new CustomEvent('traffic-violation', {

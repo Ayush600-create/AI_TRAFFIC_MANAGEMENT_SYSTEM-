@@ -14,26 +14,9 @@ const ViolationPopup = () => {
       let vehicleInfo = vehicleData.find(v => v.numberPlate === detectedNumberPlate);
       
       if (!vehicleInfo) {
-        // Hash the plate to create a stable seed (so the same plate always returns the same owner/model)
-        let hash = 0;
-        for (let i = 0; i < detectedNumberPlate.length; i++) {
-          hash = detectedNumberPlate.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const seed = Math.abs(hash);
-
-        const firstNames = ["Vikram", "Neha", "Rajesh", "Karan", "Sneha", "Aditya", "Rohan", "Pooja", "Arjun", "Deepika", "Rahul", "Priya", "Amit", "Suresh", "Ananya"];
-        const lastNames = ["Singh", "Joshi", "Mehra", "Gupta", "Verma", "Sen", "Das", "Reddy", "Nair", "Iyer", "Sharma", "Patil", "Kumar", "Raina", "Ghosh"];
-        
-        const carModels = ["Honda City", "Maruti Swift", "Tata Nexon", "Hyundai Creta", "Kia Seltos", "Mahindra XUV700", "Toyota Fortuner", "Volkswagen Virtus"];
-        const bikeModels = ["Royal Enfield Classic 350", "Yamaha FZ-S", "Honda Activa 6G", "TVS Jupiter", "KTM Duke 200", "Bajaj Pulsar 150", "Hero Splendor+"];
-        
-        const ownerName = `${firstNames[seed % firstNames.length]} ${lastNames[(seed >> 1) % lastNames.length]}`;
-        const isMotorcycle = violationType.toUpperCase().includes("HELMET") || violationType.toUpperCase().includes("TRIPLE");
-        const vehicleModel = isMotorcycle ? bikeModels[seed % bikeModels.length] : carModels[seed % carModels.length];
-        
         vehicleInfo = {
-          ownerName,
-          vehicleModel,
+          ownerName: "Unknown Owner",
+          vehicleModel: "Unknown Vehicle",
           vehicleColor: "N/A"
         };
       }

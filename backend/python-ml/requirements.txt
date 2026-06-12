@@ -2,8 +2,12 @@ fastapi
 uvicorn
 pydantic
 opencv-python-headless
+opencv-python
 ultralytics
 torch --index-url https://download.pytorch.org/whl/cpu
 numpy
 python-multipart
 python-dotenv
+easyocr
+flask
+pymongo

@@ -7,6 +7,7 @@ import time
 from core.detector import TrafficDetector
 from core.tracker import CentroidTracker
 from core.rules import TrafficRules
+import easyocr
 
 app = FastAPI(title="Production Traffic Analytics Engine")
 
@@ -14,6 +15,7 @@ app = FastAPI(title="Production Traffic Analytics Engine")
 detector = TrafficDetector()
 tracker = CentroidTracker(max_disappeared=15)
 rules = TrafficRules()
+reader = easyocr.Reader(['en'])
 
 # In-memory storage for vehicle violation history (Prevents duplicates)
 # In production, this would be a Redis cache with TTL
@@ -94,14 +96,44 @@ async def detect_api(request: ImageRequest):
                 # Deduplication Key: ID + Type
                 dedup_key = f"{assigned_id}_{viol_type}"
                 if dedup_key not in reported_violations:
-                    # Assign a mock plate based on the detected vehicle label
-                    motorcycle_plates = ["MH12DE5678", "TN07XY4321"]  # Royal Enfield, Yamaha FZ-S
-                    car_plates = ["KA01HH1234", "DL01AB9012", "WB02JK7890"]  # Honda City, Maruti Swift, Tata Nexon
-                    
-                    if d['label'].lower() == 'motorcycle':
-                        assigned_plate = motorcycle_plates[assigned_id % len(motorcycle_plates)]
-                    else:
-                        assigned_plate = car_plates[assigned_id % len(car_plates)]
+                    # Crop vehicle region from the frame
+                    h, w, _ = image.shape
+                    x_center = d['x'] * w
+                    y_center = d['y'] * h
+                    box_w = d['w'] * w
+                    box_h = d['h'] * h
+
+                    x1 = int(max(0, x_center - box_w/2))
+                    y1 = int(max(0, y_center - box_h/2))
+                    x2 = int(min(w, x_center + box_w/2))
+                    y2 = int(min(h, y_center + box_h/2))
+
+                    assigned_plate = f"UNKNOWN-{assigned_id}"
+                    cropped_frame = image[y1:y2, x1:x2]
+                    if cropped_frame.size > 0:
+                        try:
+                            # Preprocess cropped plate region
+                            cropped_frame = cv2.resize(cropped_frame, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                            gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
+                            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+                            enhanced = clahe.apply(gray)
+                            denoised = cv2.fastNlMeansDenoising(enhanced, h=30)
+                            processed = cv2.adaptiveThreshold(denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+
+                            # Run reader.readtext(processed) on the processed region
+                            ocr_results = reader.readtext(processed)
+                            if ocr_results:
+                                # Extract the text with highest confidence score
+                                best_match = max(ocr_results, key=lambda x: x[2])
+                                best_text, best_conf = best_match[1], best_match[2]
+                                
+                                if best_conf > 0.5:
+                                    # Clean the OCR result — remove spaces and special characters, keep only alphanumeric characters
+                                    cleaned_text = "".join(c for c in best_text if c.isalnum()).upper()
+                                    if cleaned_text:
+                                        assigned_plate = cleaned_text
+                        except Exception as e:
+                            print(f"[OCR ERROR] {e}")
 
                     final_violations.append({
                         "vehicle_id": assigned_id,

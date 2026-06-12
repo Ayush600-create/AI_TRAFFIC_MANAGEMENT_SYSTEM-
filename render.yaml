@@ -1,9 +1,22 @@
 services:
-  # Node Backend + React Frontend Dashboard & Python AI Service (Monolith)
+  # 1. Frontend Web Service (Node.js)
+  - type: web
+    name: traffic-frontend
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npx sirv-cli dist --port $PORT --host
+    envVars:
+      - key: VITE_API_URL
+        value: https://traffic-backend.onrender.com # Change to backend service URL if different
+      - key: PORT
+        value: 3000
+
+  # 2. Backend Web Service (Node.js)
   - type: web
     name: traffic-backend
-    runtime: docker
-    plan: starter
+    runtime: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
     envVars:
       - key: PORT
         value: 5000
@@ -16,12 +29,24 @@ services:
       - key: GROQ_API_KEY
         sync: false # Set this in Render dashboard
       - key: PYTHON_SERVICE_URL
-        value: http://127.0.0.1:8001
+        value: https://traffic-python-ai.onrender.com # Change to Python AI service URL if different
       - key: PYTHON_AI_SERVICE_URL
-        value: http://127.0.0.1:8001
+        value: https://traffic-python-ai.onrender.com
       - key: NODE_ENV
         value: production
+      - key: RENDER
+        value: "true"
     disk:
       name: traffic-storage
       mountPath: /app/backend/uploads
       sizeGB: 1
+
+  # 3. Python AI Web Service (Python)
+  - type: web
+    name: traffic-python-ai
+    runtime: python
+    buildCommand: pip install -r backend/python-ml/requirements.txt
+    startCommand: cd backend/python-ml && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 8001
