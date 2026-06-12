@@ -209,9 +209,22 @@ const VideoAnalysis = () => {
             const data = await res.json();
             if (data.length > 0) {
               setViolations(data);
+
+              // Dispatch real-time popup events for any newly found violations
+              data.forEach(viol => {
+                if (!seenViolationsRef.current.has(viol._id)) {
+                  seenViolationsRef.current.add(viol._id);
+                  const event = new CustomEvent('traffic-violation', {
+                    detail: {
+                      detectedNumberPlate: viol.numberPlate || 'UNKNOWN',
+                      violationType: viol.type
+                    }
+                  });
+                  window.dispatchEvent(event);
+                }
+              });
               
               // Group violations by frame index to show multiple boxes
-
               const groupedFrames = data.reduce((acc, v) => {
                 const existing = acc.find(f => f.frame_idx === v.frameId);
                 const detection = {
@@ -399,7 +412,7 @@ const VideoAnalysis = () => {
                 {/* Violation Image Thumb */}
                 {frame.imageUrl ? (
                   <img 
-                    src={`${frame.imageUrl}`} 
+                    src={frame.imageUrl.startsWith('http') ? frame.imageUrl : apiUrl(frame.imageUrl)} 
                     alt="violation" 
                     style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }}
                   />

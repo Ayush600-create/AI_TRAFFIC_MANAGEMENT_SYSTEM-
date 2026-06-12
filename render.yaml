@@ -1,13 +1,24 @@
 services:
+  # Node Backend + React Frontend Dashboard & Python AI Service (Monolith)
   - type: web
-    name: traffic-management-ai
+    name: traffic-backend
     runtime: docker
     plan: starter
     envVars:
+      - key: PORT
+        value: 5000
       - key: MONGO_URI
+        sync: false # Set this in Render dashboard
+      - key: GEMINI_API_KEY
         sync: false # Set this in Render dashboard
       - key: GOOGLE_GENAI_KEY
         sync: false # Set this in Render dashboard
+      - key: GROQ_API_KEY
+        sync: false # Set this in Render dashboard
+      - key: PYTHON_SERVICE_URL
+        value: http://localhost:8001
+      - key: PYTHON_AI_SERVICE_URL
+        value: http://localhost:8001
       - key: NODE_ENV
         value: production
     disk:

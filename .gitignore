@@ -14,7 +14,10 @@ dist-ssr
 
 # Environment variables
 .env
+.env.*
+*.env
 backend/.env
+frontend/.env
 
 # AI Data & Models
 backend/uploads/*
@@ -34,13 +37,33 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Python virtual environments
+.venv/
+venv/
+env/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Windows / OS / Helper scripts
+powershell.cmd
+backend/powershell.cmd
+
+# Large video assets & test files
+testvideos/
+*.mp4
+

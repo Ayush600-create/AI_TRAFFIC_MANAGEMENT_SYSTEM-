@@ -17,11 +17,11 @@ const Reports = () => {
         const formattedData = data.map(v => ({
           id: v._id,
           time: new Date(v.createdAt).toLocaleString(),
-          frame: v.frameId.toString(),
+          frame: (v.frameId !== undefined && v.frameId !== null) ? v.frameId.toString() : '0',
           loc: v.location || 'Unknown',
-          type: v.type.replace('_', ' '),
-          conf: (v.confidence * 100).toFixed(1),
-          status: v.status.toUpperCase()
+          type: (v.type || 'UNKNOWN').replace(/_/g, ' '),
+          conf: ((v.confidence || 0) * 100).toFixed(1),
+          status: (v.status || 'pending').toUpperCase()
         }));
         setReportsData(formattedData);
       })

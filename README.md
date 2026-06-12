@@ -130,20 +130,34 @@ pip install -r requirements.txt
 python app.py
 ```
 
-### Render Deployment
+### 🌐 Render Deployment (Production-Ready)
 
-This repository includes a Render-ready Docker configuration for the full stack.
-The single Docker service builds the frontend, installs backend Node dependencies, installs Python ML requirements, and starts both the Python AI engine and Express backend.
+This repository is optimized for deployment on **Render** as a single unified service using **Docker**. The container builds the static frontend assets, sets up the Node.js Express server, installs Python, OpenCV, and PyTorch (CPU-only), and spawns both services concurrently.
 
-1. Create a Render Web Service from this repo.
-2. Set the service runtime to `Docker`.
-3. Use the default `Dockerfile` in the repo root.
-4. Add required environment variables in Render:
-   - `MONGO_URI` for your MongoDB connection string
-   - `GOOGLE_GENAI_KEY` if you use the LLM service
-5. Deploy.
+#### 1. Setup in Render
+1. Create a new **Web Service** on Render and connect your repository.
+2. Under **Runtime**, select **Docker**.
+3. Choose the **Starter** plan (necessary for PyTorch/YOLO memory consumption).
 
-If you want to deploy only the frontend separately, host the backend elsewhere and point `VITE_API_URL` to that backend.
+#### 2. Environment Variables Configuration
+In the **Environment** tab on Render, add the following variables:
+
+| Variable | Description | Example / Value |
+| --- | --- | --- |
+| `MONGO_URI` | MongoDB connection string (e.g. Atlas) | `mongodb+srv://...` |
+| `GEMINI_API_KEY` | (Optional) Gemini API key for LLM explanations | `AIzaSy...` |
+| `GROQ_API_KEY` | (Optional) Groq API key for Llama explanations | `gsk_...` |
+| `PYTHON_SERVICE_URL` | Endpoint of the Python ML engine | `http://localhost:8001` (Default inside container) |
+| `NODE_ENV` | Mode of operation | `production` |
+| `PORT` | Node.js Server listening port | `5000` (Default on Render) |
+
+#### 3. Persistent Storage (Render Disk)
+To prevent losing uploaded videos when your container restarts, attach a persistent disk:
+- **Name**: `traffic-storage`
+- **Mount Path**: `/app/backend/uploads`
+- **Size**: `1 GiB` (minimum)
+
+Once configured, hit **Deploy** and your full-stack AI traffic system will be live!
 
 ---
 

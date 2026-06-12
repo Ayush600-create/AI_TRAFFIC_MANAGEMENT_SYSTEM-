@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api';
 import { AlertCircle, MapPin, CheckCircle, Download, Database, TrafficCone } from 'lucide-react';
+import vehicleData from '../data/vehicleDataset.json';
 
 const Records = () => {
   const { id } = useParams();
@@ -31,6 +32,12 @@ const Records = () => {
         
         if (data.error) throw new Error(data.error);
 
+        const vehicleInfo = vehicleData.find(v => v.numberPlate === data.numberPlate) || {
+          ownerName: "Unknown Owner",
+          vehicleModel: "Unknown Vehicle",
+          vehicleColor: "N/A"
+        };
+
         const mapped = {
           caseId: data._id,
           priority: data.confidence > 0.85 ? 'HIGH PRIORITY' : 'MEDIUM',
@@ -46,8 +53,11 @@ const Records = () => {
           meta: {
             timestamp: data.timestamp?.toFixed(2) + 's',
             vehicle: data.vehicleType,
-            plate: 'UNKNOWN',
-            location: data.location || 'Sector 4 Crossing'
+            plate: data.numberPlate || 'UNKNOWN',
+            location: data.location || 'Sector 4 Crossing',
+            ownerName: vehicleInfo.ownerName,
+            vehicleModel: vehicleInfo.vehicleModel,
+            vehicleColor: vehicleInfo.vehicleColor
           }
         };
         setRecord(mapped);
@@ -116,7 +126,7 @@ const Records = () => {
           {record.imageUrl ? (
             <>
               <img 
-                src={`${record.imageUrl}`} 
+                src={record.imageUrl.startsWith('http') ? record.imageUrl : apiUrl(record.imageUrl)} 
                 alt="Violation Frame" 
                 style={{ width: '100%', height: '100%', objectFit: 'fill' }} 
               />
@@ -221,6 +231,18 @@ const Records = () => {
               <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin size={14}/> Location</span>
               <span>{record.meta.location}</span>
             </div>
+            {record.meta.ownerName && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>Owner</span>
+                <span>{record.meta.ownerName}</span>
+              </div>
+            )}
+            {record.meta.vehicleModel && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                <span style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>Vehicle</span>
+                <span>{record.meta.vehicleModel} ({record.meta.vehicleColor})</span>
+              </div>
+            )}
             
             <div style={{ marginTop: '1rem', height: '150px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Dummy Map Area */}

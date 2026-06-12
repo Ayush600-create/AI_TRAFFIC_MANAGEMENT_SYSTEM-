@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const PYTHON_SERVICE_URL = process.env.PYTHON_AI_SERVICE_URL || 'http://localhost:8001';
+const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL || process.env.PYTHON_AI_SERVICE_URL || 'http://localhost:8001';
 
 /**
  * Sends a frame to the Python ML service for detection and rule-based verification.
@@ -11,6 +11,8 @@ const analyzeFrame = async (framePath) => {
   try {
     const response = await axios.post(`${PYTHON_SERVICE_URL}/detect`, {
       image_path: framePath
+    }, {
+      timeout: 10000 // 10 seconds timeout
     });
     return response.data;
   } catch (error) {
