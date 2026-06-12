@@ -49,21 +49,20 @@ const connectDatabase = async () => {
     return mongoose.connect(mongoUri);
   }
 
-  // Disable in-memory MongoDB fallback in production to prevent deployment hangs/crashes
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('WARNING: MONGO_URI is not set in production. Skipping database connection. Application will run in stateless mode.');
+  // Only use MongoMemoryServer in local development environments (not in production, and not on Render)
+  if (process.env.NODE_ENV !== 'production' && process.env.RENDER !== 'true') {
+    try {
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      const mongod = await MongoMemoryServer.create();
+      const uri = mongod.getUri();
+      console.log('Using in-memory MongoDB at', uri);
+      return mongoose.connect(uri);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  } else {
+    console.warn('Production mode without MONGO_URI: running stateless (no database)');
     return null;
-  }
-
-  // Fallback to in-memory MongoDB for quick local demo if no URI provided
-  try {
-    const { MongoMemoryServer } = require('mongodb-memory-server');
-    const mongod = await MongoMemoryServer.create();
-    const uri = mongod.getUri();
-    console.log('Using in-memory MongoDB at', uri);
-    return mongoose.connect(uri);
-  } catch (err) {
-    return Promise.reject(err);
   }
 };
 
