@@ -206,7 +206,7 @@ MIT License
 
 ## 👨‍💻 Author
 
-**Devanshu Sharma**
+**Ayush Sharma**
 
 * B.E. CSE (AI & ML)
 * Chandigarh University
